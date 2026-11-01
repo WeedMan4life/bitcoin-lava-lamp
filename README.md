@@ -6,7 +6,7 @@ transaction, sized by vsize and colored by fee rate, laid out with the
 same grid bin-packing algorithm as the real Mempool site. New
 transactions insert into existing free space (Tetris-drop, grow, or
 fade in — your choice); confirmed/evicted transactions free their
-space for reuse. Currently at **v0.30** — the version number is shown
+space for reuse. Currently at **v0.36** — the version number is shown
 next to the title in the overlay, so you can always confirm which
 build you're actually looking at before troubleshooting anything
 (browser caching has been the cause of several false alarms in this
@@ -101,6 +101,7 @@ rather than silent.
 | File | Responsibility |
 |---|---|
 | `config.js` | All tunables, version string, color gradient |
+| `config.local.example.js` | Template for `config.local.js` — your node's address and any per-machine overrides (gitignored, never committed) |
 | `data.js` | Websocket subscription, real per-transaction state, reconnect/drift/stall recovery, hashrate/tip-height fetching |
 | `grid-layout.js` | Ported grid bin-packing algorithm with incremental insert/remove (`Slot`/`Row`/`BlockLayout`) |
 | `cells.js` | Tile state: grid → screen transform, entry animations, easing |
@@ -115,10 +116,24 @@ rather than silent.
 ## Running it
 
 `app.js` is an ES module, so opening `index.html` directly via `file://`
-will be blocked by the browser. Serve the folder locally:
+will be blocked by the browser.
+
+Get the code and point it at your node:
 
 ```bash
-cd bitcoin-wallpaper
+git clone https://github.com/WeedMan4life/bitcoin-lava-lamp.git
+cd bitcoin-lava-lamp
+cp config.local.example.js config.local.js   # Windows: copy config.local.example.js config.local.js
+```
+
+Edit `config.local.js` and set `NODE_BASE_URL` to your StartOS Mempool
+instance's address. That file is gitignored, so your node's address
+stays on your machine. No node of your own? Skip this step and pick
+"mempool.space" as the data source in the settings panel.
+
+Then serve the folder locally:
+
+```bash
 python serve.py 8080
 ```
 
@@ -148,13 +163,13 @@ your StartOS box itself, just reachable over the same network.
 
 1. Flash Raspberry Pi OS onto the Pi (Desktop edition is simplest for
    this — Lite works too but needs a bit more manual X11/autostart setup).
-2. Copy the `bitcoin-wallpaper` folder onto the Pi.
+2. Clone the repo (or copy the `bitcoin-lava-lamp` folder) onto the Pi.
 3. Copy `config.local.example.js` to `config.local.js` and set
    `NODE_BASE_URL` to your StartOS Mempool instance's address, reachable
    from the Pi's network. (`config.local.js` is gitignored.)
 4. Make the scripts executable and run the launcher:
    ```bash
-   cd bitcoin-wallpaper
+   cd bitcoin-lava-lamp
    chmod +x start.sh stop.sh
    ./start.sh
    ```
@@ -168,7 +183,7 @@ your StartOS box itself, just reachable over the same network.
    [Desktop Entry]
    Type=Application
    Name=Bitcoin Wallpaper
-   Exec=/full/path/to/bitcoin-wallpaper/start.sh
+   Exec=/full/path/to/bitcoin-lava-lamp/start.sh
    ```
    (use the actual full path, not `~`). Reboot to test.
 6. `./stop.sh` shuts the background server down when needed.
@@ -178,7 +193,8 @@ your StartOS box itself, just reachable over the same network.
 Using [Lively Wallpaper](https://www.rocksdanister.com/lively/) (free,
 open source, supports live websites as animated wallpapers):
 
-1. Install Lively Wallpaper.
+1. Install Lively Wallpaper, and set up `config.local.js` as described
+   in [Running it](#running-it).
 2. Double-click **`start-server-only.bat`** — starts the background
    server without opening any browser window.
 3. In Lively: **Add Wallpaper → Website** → enter `http://localhost:8080`.
@@ -206,8 +222,9 @@ works as a one-off fix if this crops up.
 For a spare monitor/TV connected to a Windows PC, showing nothing but
 the lamp:
 
-1. Copy the whole `bitcoin-wallpaper` folder to that computer (needs
-   Python and Chrome installed).
+1. Clone the repo (or copy the whole `bitcoin-lava-lamp` folder) to
+   that computer (needs Python and Chrome installed), and set up
+   `config.local.js` as described in [Running it](#running-it).
 2. Double-click **`start.bat`**. It starts the server in the background
    (a minimized window titled "BitcoinWallpaperServer") and opens Chrome
    in true fullscreen kiosk mode — no address bar, no tabs, nothing but
@@ -229,7 +246,9 @@ Chrome isn't registered the usual way), edit `start.bat` and replace
 
 ## Configuration
 
-Edit `config.js`, or use the in-app settings panel (gear icon, top
+Defaults live in `config.js`. To change a setting just for your
+machine, add it to `config.local.js` instead (it overrides any key in
+`CONFIG` and isn't committed). Or use the in-app settings panel (gear icon, top
 right) for these live:
 
 - **Data source** — "My node" (your own `NODE_BASE_URL`, default) or
