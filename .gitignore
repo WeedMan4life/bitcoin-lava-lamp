@@ -1,0 +1,4 @@
+# Per-machine settings (your node's address)
+config.local.js
+
+__pycache__/

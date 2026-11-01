@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bitcoin Wallpaper</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=VT323&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<div id="overlay">
+    <h1>Bitcoin Wallpaper <span id="appVersion" class="version"></span></h1>
+    <div id="stats">
+        <div><span id="statusDot" class="dot"></span><span id="statusText">Connecting…</span></div>
+        <div>Block: <span id="blockHeight">–</span></div>
+        <div>Mempool tx: <span id="txCount">–</span> (<span id="tileCount">–</span> tiles rendered)</div>
+        <div>Mempool size: <span id="vsize">–</span> MB</div>
+        <div>Medium fee: <span id="nextFee">–</span> sat/vB</div>
+        <div>Network hashrate: <span id="hashrate">–</span></div>
+        <div>Time: <span id="updated">–</span></div>
+    </div>
+    <div id="hint">o = hide overlay &nbsp;·&nbsp; f = fullscreen &nbsp;·&nbsp; hover a tile for detail</div>
+</div>
+
+<div id="bottomLeftStack">
+    <div id="bigBlockNumber" class="hidden">–</div>
+    <div id="legend">
+        <div id="legendLabel">Fee rate</div>
+        <div id="legendBar"></div>
+        <div id="legendLabels"><span>lower</span><span>higher</span></div>
+    </div>
+</div>
+
+<button id="settingsToggle" title="Settings">⚙</button>
+<div id="settingsPanel" class="hidden"></div>
+
+<div id="tooltip" class="hidden"></div>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
