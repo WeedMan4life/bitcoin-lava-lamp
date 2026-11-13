@@ -187,11 +187,28 @@ export function initUI({ onSettingChange }) {
         // transaction info either -- that defeats the point of hiding.
         if (overlay.classList.contains("hidden")) return;
 
-        const shortTxid = cell.id ? `${cell.id.slice(0, 8)}…${cell.id.slice(-6)}` : "";
-        tooltip.innerHTML =
-            `<strong>${cell.feerate.toFixed(1)} sat/vB</strong><br>` +
-            `${cell.fee.toLocaleString()} sat fee &middot; ${cell.vsize.toFixed(0)} vB<br>` +
-            `<span style="opacity:0.6">${shortTxid}</span>`;
+        // Built with DOM nodes + textContent, never innerHTML: these
+        // values originate from the network, so they must only ever be
+        // treated as text, not parsed as HTML.
+        const id = typeof cell.id === "string" ? cell.id : "";
+        const shortTxid = id ? `${id.slice(0, 8)}…${id.slice(-6)}` : "";
+        const feerate = Number(cell.feerate) || 0;
+        const fee = Number(cell.fee) || 0;
+        const vsize = Number(cell.vsize) || 0;
+
+        const rateEl = document.createElement("strong");
+        rateEl.textContent = `${feerate.toFixed(1)} sat/vB`;
+        const txidEl = document.createElement("span");
+        txidEl.className = "tooltipTxid";
+        txidEl.textContent = shortTxid;
+
+        tooltip.replaceChildren(
+            rateEl,
+            document.createElement("br"),
+            `${fee.toLocaleString()} sat fee · ${vsize.toFixed(0)} vB`,
+            document.createElement("br"),
+            txidEl
+        );
         tooltip.style.left = (clientX + 14) + "px";
         tooltip.style.top = (clientY + 14) + "px";
         tooltip.classList.remove("hidden");

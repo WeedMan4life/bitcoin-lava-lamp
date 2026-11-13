@@ -143,6 +143,15 @@ bare `python -m http.server` command.)
 
 Then open `http://localhost:8080`.
 
+**Security note:** `serve.py` only listens on `127.0.0.1` -- this
+computer, not your whole network -- and refuses to serve hidden files
+like `.git`. That matters because the folder contains `config.local.js`
+(your node's address). To deliberately expose it to other devices, run
+`python serve.py 8080 0.0.0.0`. The page also ships a
+Content-Security-Policy and bundles its fonts locally (`fonts/`, SIL
+Open Font License), so it makes no third-party requests other than to
+the data source you choose.
+
 **If you don't see your changes after updating files**, this has come
 up repeatedly: hard-refresh (Ctrl+Shift+R) isn't always enough. Most
 reliable fix is serving from a fresh, unused port each time

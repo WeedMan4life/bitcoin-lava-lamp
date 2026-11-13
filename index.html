@@ -4,9 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Bitcoin Wallpaper</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=VT323&display=swap" rel="stylesheet">
+<!--
+  Content-Security-Policy: tells the browser what this page is allowed
+  to load and run. Scripts, styles, fonts and images may only come from
+  this app's own folder ('self') - nothing inline, nothing third-party.
+  connect-src is left open to any http(s)/ws(s) host because the data
+  source (your node's address) is user-configured and can't be known
+  here; that only permits fetching DATA, not running code.
+-->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; connect-src http: https: ws: wss:; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="no-referrer">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>

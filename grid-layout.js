@@ -5,6 +5,15 @@
 // first-fit bin-packing algorithm, placing transactions as SQUARES
 // (not arbitrary rectangles), largest/highest-fee first. This is a
 // faithful translation of that Slot/Row/BlockLayout logic.
+//
+// Original work: The Mempool Open Source Project
+// Copyright (c) 2019-2026 Mempool Holdings S.A. de C.V. and other
+// shadowy super-coders. Used and modified here under the GNU Affero
+// General Public License v3 (see LICENSE and the README's "License and
+// credits" section). Modified: translated from TypeScript to plain
+// JavaScript and adapted for this app.
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
 // ---------------------------------------------------------------------
 
 class Slot {

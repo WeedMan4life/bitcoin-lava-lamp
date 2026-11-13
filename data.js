@@ -36,8 +36,21 @@ import { CONFIG } from "./config.js";
 // fabrication needed for the treemap tile sizes.
 // ---------------------------------------------------------------------
 
+// Everything arriving over the websocket is untrusted input -- even from
+// your own node, and certainly from a public one. Validate the shape
+// and coerce every numeric field to a real number here, at the edge,
+// so nothing downstream (layout maths, the tooltip) ever handles a
+// string or object where it expects a number. Returns null for
+// anything malformed; callers skip those entries.
 function parseCompactTx(t) {
-    return { txid: t[0], fee: t[1], vsize: t[2], value: t[3], rate: t[4] };
+    if (!Array.isArray(t) || typeof t[0] !== "string" || t[0].length === 0) return null;
+    const fee = Number(t[1]);
+    const vsize = Number(t[2]);
+    const value = Number(t[3]);
+    let rate = Number(t[4]);
+    if (!Number.isFinite(fee) || !Number.isFinite(vsize) || vsize <= 0) return null;
+    if (!Number.isFinite(rate)) rate = fee / vsize;
+    return { txid: t[0], fee, vsize, value: Number.isFinite(value) ? value : 0, rate };
 }
 
 // "changed" entries are NOT full tuples like "added" -- they only carry
@@ -47,10 +60,11 @@ function parseCompactTx(t) {
 // garbage into vsize/fee, which is exactly what was causing a couple of
 // transactions to blow up into huge, layout-breaking squares.
 function parseChangedTx(t) {
-    if (Array.isArray(t)) {
-        return { txid: t[0], rate: t[1] };
-    }
-    return { txid: t.txid, rate: t.rate };
+    if (!t || typeof t !== "object") return null;
+    const txid = Array.isArray(t) ? t[0] : t.txid;
+    const rate = Number(Array.isArray(t) ? t[1] : t.rate);
+    if (typeof txid !== "string" || !Number.isFinite(rate)) return null;
+    return { txid, rate };
 }
 
 export function createDataLayer({ onMempoolUpdate, onBlockFound, onStatus, onBlockTxUpdate, onTipHeight, onHashrate }) {
@@ -166,7 +180,7 @@ export function createDataLayer({ onMempoolUpdate, onBlockFound, onStatus, onBlo
         if (Array.isArray(pbt.blockTransactions)) {
             pbt.blockTransactions.forEach(t => {
                 const tx = parseCompactTx(t);
-                txState.set(tx.txid, tx);
+                if (tx) txState.set(tx.txid, tx);
             });
             lastDeltaTime = Date.now();
             console.log(`[${new Date().toLocaleTimeString()}] seq=${sequence} FULL SNAPSHOT: ${pbt.blockTransactions.length} transactions => tracked ${txState.size}`);
@@ -192,10 +206,11 @@ export function createDataLayer({ onMempoolUpdate, onBlockFound, onStatus, onBlo
 
         (delta.added || []).forEach(t => {
             const tx = parseCompactTx(t);
-            txState.set(tx.txid, tx);
+            if (tx) txState.set(tx.txid, tx);
         });
         (delta.changed || []).forEach(t => {
             const update = parseChangedTx(t);
+            if (!update) return;
             const existing = txState.get(update.txid);
             if (existing) {
                 existing.rate = update.rate;
