@@ -6,7 +6,7 @@ transaction, sized by vsize and colored by fee rate, laid out with the
 same grid bin-packing algorithm as the real Mempool site. New
 transactions insert into existing free space (Tetris-drop, grow, or
 fade in — your choice); confirmed/evicted transactions free their
-space for reuse. Currently at **v0.36** — the version number is shown
+space for reuse. Currently at **v1.0.0** — the version number is shown
 next to the title in the overlay, so you can always confirm which
 build you're actually looking at before troubleshooting anything
 (browser caching has been the cause of several false alarms in this
@@ -341,3 +341,34 @@ Hover the tile to confirm its real vsize before assuming it's a bug.
 Real quiet mempools can genuinely have a narrow fee-rate spread — this
 was checked against the real site's own behavior on the same node and
 confirmed to match, not a bug.
+
+## License and credits
+
+Bitcoin Wallpaper is free software, licensed under the **GNU Affero
+General Public License v3.0 or later** (AGPL-3.0-or-later). The full
+text is in [`LICENSE`](LICENSE).
+
+Copyright (C) 2026 WeedMan4life
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the license for
+details. If you run a modified version where other people can reach it
+over a network, the AGPL requires you to offer them your source code.
+
+**Built on [The Mempool Open Source Project](https://github.com/mempool/mempool).**
+The block layout in `grid-layout.js` is a JavaScript port of
+`block-scene.ts` from the Mempool frontend, and
+`mempool-block.component.ts` is an unmodified upstream file kept purely
+as a reference (the app doesn't load it). Both are Copyright (c)
+2019-2026 Mempool Holdings S.A. de C.V. and other contributors,
+licensed under the AGPL v3 -- which is why this project uses the same
+license. Thank you to the Mempool team for building it in the open.
+
+This is an independent hobby project. It is not affiliated with,
+endorsed by, or sponsored by Mempool Holdings or mempool.space, and
+their names and logos are their trademarks (see their
+[trademark policy](https://mempool.space/trademark-policy)).
+
+The bundled fonts, Space Grotesk and VT323, are licensed under the SIL
+Open Font License 1.1 (see the `fonts/` folder).
