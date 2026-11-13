@@ -1,4 +1,4 @@
-export const APP_VERSION = "v1.0.0";
+export const APP_VERSION = "v1.1.0";
 
 export const CONFIG = {
 
@@ -10,8 +10,10 @@ export const CONFIG = {
     // currently EFFECTIVE url, computed just below from whichever
     // source is selected.
     //
-    // Don't put your real address here -- set it in config.local.js
-    // (gitignored, see config.local.example.js), which overrides this.
+    // Don't put your real address here. Either type it into the
+    // settings panel (gear icon -> "My node address", remembered by
+    // your browser), or set it in config.local.js (gitignored, see
+    // config.local.example.js). Both override this placeholder.
     NODE_BASE_URL: "https://your-startos-mempool.local",
 
     BASE_URL: "", // set below, once NODE_BASE_URL exists to fall back to
@@ -140,21 +142,73 @@ function clamp01(v) { return Math.max(0, Math.min(1, v)); }
 const DATA_SOURCE_KEY = "bitcoinWallpaperDataSource";
 export const PUBLIC_BASE_URL = "https://mempool.space";
 
+// With no explicit choice saved yet, default to the user's own node if
+// one has been configured, otherwise to the public API -- so a
+// first-time visitor sees a working lamp instead of "Reconnecting...".
 export function getDataSource() {
+    const fallback = hasNodeConfigured() ? "node" : "public";
     try {
-        return localStorage.getItem(DATA_SOURCE_KEY) || "node";
+        return localStorage.getItem(DATA_SOURCE_KEY) || fallback;
     } catch {
-        return "node";
+        return fallback;
     }
 }
 
+// Pass "" to forget the choice and go back to the automatic default.
 export function setDataSource(source) {
     try {
-        localStorage.setItem(DATA_SOURCE_KEY, source);
+        if (source) localStorage.setItem(DATA_SOURCE_KEY, source);
+        else localStorage.removeItem(DATA_SOURCE_KEY);
     } catch {
         // localStorage unavailable (e.g. private browsing) -- the
         // toggle just won't persist across reloads, not fatal.
     }
+}
+
+// ---------------------------------------------------------------------
+// Node address typed into the settings panel. Stored in this browser's
+// localStorage only -- it never leaves the machine and is never part
+// of the repo. This is what makes the app usable without editing any
+// files (the hosted page and the Windows .exe both rely on it).
+// ---------------------------------------------------------------------
+
+const NODE_URL_KEY = "bitcoinWallpaperNodeUrl";
+const NODE_URL_PLACEHOLDER = CONFIG.NODE_BASE_URL;
+
+// Accepts only a plain http(s) address. Returns the cleaned-up URL
+// (no trailing slash, query or fragment), or null if it isn't valid.
+export function normalizeNodeUrl(input) {
+    let url;
+    try {
+        url = new URL(String(input).trim());
+    } catch {
+        return null;
+    }
+    if (url.protocol !== "http:" && url.protocol !== "https:") return null;
+    if (url.username || url.password) return null;
+    return url.origin + url.pathname.replace(/\/+$/, "");
+}
+
+export function getSavedNodeUrl() {
+    try {
+        return normalizeNodeUrl(localStorage.getItem(NODE_URL_KEY) || "") || "";
+    } catch {
+        return "";
+    }
+}
+
+// Pass "" to forget the saved address.
+export function setSavedNodeUrl(url) {
+    try {
+        if (url) localStorage.setItem(NODE_URL_KEY, url);
+        else localStorage.removeItem(NODE_URL_KEY);
+    } catch {
+        // localStorage unavailable -- can't persist, not fatal.
+    }
+}
+
+export function hasNodeConfigured() {
+    return CONFIG.NODE_BASE_URL !== NODE_URL_PLACEHOLDER;
 }
 
 // Optional per-machine overrides (e.g. your real NODE_BASE_URL) from
@@ -166,5 +220,9 @@ try {
 } catch {
     // no config.local.js -- not fatal
 }
+
+// An address saved from the settings panel wins over config.local.js.
+const savedNodeUrl = getSavedNodeUrl();
+if (savedNodeUrl) CONFIG.NODE_BASE_URL = savedNodeUrl;
 
 CONFIG.BASE_URL = getDataSource() === "public" ? PUBLIC_BASE_URL : CONFIG.NODE_BASE_URL;

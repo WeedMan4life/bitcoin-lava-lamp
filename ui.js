@@ -1,4 +1,7 @@
-import { CONFIG, APP_VERSION, getDataSource, setDataSource } from "./config.js";
+import {
+    CONFIG, APP_VERSION, getDataSource, setDataSource,
+    normalizeNodeUrl, getSavedNodeUrl, setSavedNodeUrl, hasNodeConfigured
+} from "./config.js";
 
 export function initUI({ onSettingChange }) {
     const overlay = document.getElementById("overlay");
@@ -58,6 +61,70 @@ export function initUI({ onSettingChange }) {
     });
     dataSourceRow.appendChild(dataSourceGroup);
     settingsPanel.appendChild(dataSourceRow);
+
+    // Node address: lets people point the app at their own Mempool
+    // instance without editing any files. Saved in this browser only.
+    const nodeRow = document.createElement("div");
+    nodeRow.className = "settingRow";
+    const nodeLabel = document.createElement("label");
+    nodeLabel.textContent = "My node address";
+    nodeLabel.htmlFor = "nodeUrlInput";
+    nodeRow.appendChild(nodeLabel);
+
+    const nodeGroup = document.createElement("div");
+    nodeGroup.className = "nodeUrlGroup";
+    const nodeInput = document.createElement("input");
+    nodeInput.type = "url";
+    nodeInput.id = "nodeUrlInput";
+    nodeInput.placeholder = "https://your-mempool.local";
+    nodeInput.spellcheck = false;
+    nodeInput.autocomplete = "off";
+    nodeInput.value = getSavedNodeUrl() || (hasNodeConfigured() ? CONFIG.NODE_BASE_URL : "");
+    const nodeSave = document.createElement("button");
+    nodeSave.type = "button";
+    nodeSave.textContent = "Save";
+    nodeSave.className = "toggleBtn";
+    nodeGroup.appendChild(nodeInput);
+    nodeGroup.appendChild(nodeSave);
+    nodeRow.appendChild(nodeGroup);
+
+    const nodeMsg = document.createElement("div");
+    nodeMsg.className = "settingMsg";
+    nodeRow.appendChild(nodeMsg);
+
+    function saveNodeUrl() {
+        const raw = nodeInput.value.trim();
+        if (raw === "") {
+            // Cleared: forget the saved address (falls back to
+            // config.local.js if there is one, else mempool.space).
+            setSavedNodeUrl("");
+            setDataSource("");
+            location.reload();
+            return;
+        }
+        const url = normalizeNodeUrl(raw);
+        if (!url) {
+            nodeMsg.textContent = "Enter a full address starting with https:// or http://";
+            return;
+        }
+        // Browsers refuse plain-http requests from a page that was
+        // itself loaded over https (the hosted version of this app).
+        if (location.protocol === "https:" && url.startsWith("http://")) {
+            nodeMsg.textContent = "This page is loaded over https, so the node address must start with https:// too.";
+            return;
+        }
+        setSavedNodeUrl(url);
+        setDataSource("node");
+        location.reload();
+    }
+    nodeSave.addEventListener("click", saveNodeUrl);
+    nodeInput.addEventListener("keydown", (e) => {
+        // Stop keystrokes reaching the global shortcuts ('o' hides the
+        // overlay, 'f' toggles fullscreen) while typing an address.
+        e.stopPropagation();
+        if (e.key === "Enter") saveNodeUrl();
+    });
+    settingsPanel.appendChild(nodeRow);
 
     // Big block number, bottom-left -- independent of the overlay's
     // show/hide state (the 'o' key), since it's meant as a minimal
@@ -147,6 +214,18 @@ export function initUI({ onSettingChange }) {
         row.appendChild(input);
         settingsPanel.appendChild(row);
     });
+
+    // Link to the source code (the AGPL asks that users of a networked
+    // copy can get the source; this makes that one click away).
+    const sourceRow = document.createElement("div");
+    sourceRow.className = "settingRow settingFooter";
+    const sourceLink = document.createElement("a");
+    sourceLink.href = "https://github.com/WeedMan4life/bitcoin-lava-lamp";
+    sourceLink.target = "_blank";
+    sourceLink.rel = "noopener noreferrer";
+    sourceLink.textContent = "Source code (AGPL-3.0)";
+    sourceRow.appendChild(sourceLink);
+    settingsPanel.appendChild(sourceRow);
 
     function updateStatus(connected) {
         statusDot.classList.toggle("connected", connected);

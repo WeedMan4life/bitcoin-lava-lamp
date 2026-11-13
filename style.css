@@ -287,3 +287,45 @@ canvas {
 .tooltipTxid {
     opacity: 0.6;
 }
+
+.nodeUrlGroup {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 4px;
+}
+
+.nodeUrlGroup input {
+    min-width: 0;
+    font: inherit;
+    font-size: 11px;
+    color: #f2e9dc;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 6px;
+    padding: 5px 7px;
+}
+
+.nodeUrlGroup input:focus {
+    outline: none;
+    border-color: rgba(255, 210, 140, 0.6);
+}
+
+.settingMsg {
+    font-size: 10px;
+    color: #e0a070;
+}
+
+.settingMsg:empty {
+    display: none;
+}
+
+.settingFooter a {
+    font-size: 10px;
+    color: #7d7266;
+    text-decoration: none;
+}
+
+.settingFooter a:hover {
+    color: #cfc4b4;
+}
+

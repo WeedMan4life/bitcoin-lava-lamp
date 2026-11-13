@@ -6,11 +6,41 @@ transaction, sized by vsize and colored by fee rate, laid out with the
 same grid bin-packing algorithm as the real Mempool site. New
 transactions insert into existing free space (Tetris-drop, grow, or
 fade in — your choice); confirmed/evicted transactions free their
-space for reuse. Currently at **v1.0.0** — the version number is shown
+space for reuse. Currently at **v1.1.0** — the version number is shown
 next to the title in the overlay, so you can always confirm which
 build you're actually looking at before troubleshooting anything
 (browser caching has been the cause of several false alarms in this
 project's history).
+
+## Quick start
+
+Three ways to run it, easiest first:
+
+1. **Just open it** -- <https://weedman4life.github.io/bitcoin-lava-lamp/>.
+   Nothing to install. Shows the public mempool.space data straight
+   away. (Paste the same link into Lively Wallpaper to use it as a
+   desktop background.)
+2. **Windows app** -- download `BitcoinWallpaper.exe` from the
+   [latest release](https://github.com/WeedMan4life/bitcoin-lava-lamp/releases/latest)
+   and double-click it. No Python or Git needed. It opens the lamp in
+   your browser; close its window to stop it. Windows will show a blue
+   "Windows protected your PC" box the first time because the file
+   isn't code-signed -- click **More info -> Run anyway**. The .exe is
+   built by GitHub from this exact source code (see the Actions tab),
+   and each release lists its SHA-256 checksum.
+3. **From source** -- needs Python; see [Running it](#running-it).
+
+**Using your own node:** click the gear icon, type your Mempool
+address into **My node address**, and press Save. It's remembered by
+your browser only -- it is never uploaded anywhere. Clear the box and
+Save to go back to mempool.space.
+
+Which option for your own node? Options 2 and 3 are the reliable ones,
+because the page then comes from your own computer. With option 1 the
+page comes from the public internet, so Chrome asks permission before
+letting it talk to a device on your home network (click **Allow**),
+your node's address must start with `https://`, and wallpaper apps
+that can't show that permission prompt may not connect at all.
 
 ## This is a real port, not an approximation
 
@@ -108,7 +138,9 @@ rather than silent.
 | `renderer.js` | Canvas2D drawing: squares, grid gaps, block-found flash |
 | `ui.js` | Stats overlay, settings panel, tooltip, color legend |
 | `app.js` | Wires everything together, main loop |
-| `serve.py` | Threaded static file server (handles simultaneous requests correctly -- see multi-monitor note below) |
+| `serve.py` | Threaded static file server (handles simultaneous requests correctly -- see multi-monitor note below); also the program inside `BitcoinWallpaper.exe` |
+| `BitcoinWallpaper.spec` | Build recipe that bundles `serve.py` and the app into the Windows `.exe` |
+| `.github/workflows/release.yml` | Tells GitHub to build, test and publish the `.exe` whenever a version tag is pushed |
 | `start.bat` / `stop.bat` | Windows dedicated-monitor kiosk launcher |
 | `start-server-only.bat` | Windows server-only launcher, for the Lively Wallpaper desktop background setup |
 | `start.sh` / `stop.sh` | Linux/Raspberry Pi kiosk launcher, for a small screen on the node |
@@ -128,8 +160,9 @@ cp config.local.example.js config.local.js   # Windows: copy config.local.exampl
 
 Edit `config.local.js` and set `NODE_BASE_URL` to your StartOS Mempool
 instance's address. That file is gitignored, so your node's address
-stays on your machine. No node of your own? Skip this step and pick
-"mempool.space" as the data source in the settings panel.
+stays on your machine. (Or skip the file entirely and type the address
+into the settings panel once the app is open.) No node of your own?
+Skip this step -- the app uses mempool.space until a node is set.
 
 Then serve the folder locally:
 
@@ -260,12 +293,14 @@ machine, add it to `config.local.js` instead (it overrides any key in
 `CONFIG` and isn't committed). Or use the in-app settings panel (gear icon, top
 right) for these live:
 
-- **Data source** — "My node" (your own `NODE_BASE_URL`, default) or
+- **Data source** — "My node" (default once a node address is set) or
   "mempool.space" (the public API, for people without their own
-  self-hosted node). Switching reloads the page to cleanly
+  self-hosted node, and the default until an address is set). Switching reloads the page to cleanly
   reinitialize the connection. Persisted via `localStorage` (this is a
   real deployed app, not a Claude artifact, so that's the normal,
   correct way to remember the choice across reloads).
+- **My node address** — your Mempool instance's address, saved in this
+  browser's `localStorage`. Takes priority over `config.local.js`.
 - **Reflow speed** — how fast landed tiles ease into a new position/size
 - **New tile animation** — Fall (Tetris-style drop) / **Slide** / Grow
   (scale up in place) / Fade (opacity in place). Clicking a button

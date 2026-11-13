@@ -2,3 +2,7 @@
 config.local.js
 
 __pycache__/
+
+# PyInstaller output (the Windows .exe is built by GitHub, not committed)
+build/
+dist/
