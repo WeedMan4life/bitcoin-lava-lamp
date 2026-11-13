@@ -28,6 +28,13 @@ Three ways to run it, easiest first:
    isn't code-signed -- click **More info -> Run anyway**. The .exe is
    built by GitHub from this exact source code (see the Actions tab),
    and each release lists its SHA-256 checksum.
+
+   Keep the black window open while you use the lamp (minimise it if
+   you like); closing it stops the server. If your PC has **Smart App
+   Control** turned on (Windows 11 only), it may refuse to run the
+   `.exe` at all, with no "Run anyway" option -- the `.exe` isn't
+   code-signed yet. In that case use option 1, or option 3 if you have
+   Python.
 3. **From source** -- needs Python; see [Running it](#running-it).
 
 **Using your own node:** click the gear icon, type your Mempool
@@ -175,6 +182,14 @@ the multi-monitor note further down for why it's used instead of the
 bare `python -m http.server` command.)
 
 Then open `http://localhost:8080`.
+
+**`start.bat` / `stop.bat` blocked by Smart App Control?** Files
+that arrive via a browser download -- including GitHub's "Download
+ZIP" button -- carry a hidden "from the internet" tag, and Smart App
+Control refuses to run tagged `.bat` files. Right-click the file,
+choose Properties, tick **Unblock** at the bottom, and click OK. Files
+fetched with `git clone` don't have the tag, so this doesn't happen
+that way.
 
 **Security note:** `serve.py` only listens on `127.0.0.1` -- this
 computer, not your whole network -- and refuses to serve hidden files
